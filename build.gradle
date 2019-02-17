@@ -1,0 +1,84 @@
+buildscript {
+    repositories {
+        mavenCentral()
+ jcenter()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath "io.spring.gradle:dependency-management-plugin:$springDependencyManagementPluginVersion"
+    }
+
+}
+
+
+plugins {
+    id "com.github.ben-manes.versions" version "0.20.0"
+}
+
+apply plugin: WaitForMySqlPlugin
+
+subprojects {
+
+    apply plugin: "java"
+    apply plugin: 'pmd'
+
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+
+    group = "net.chrisrichardson.ftgo"
+
+    repositories {
+        mavenCentral()
+        jcenter()
+
+        eventuateMavenRepoUrl.split(',').each { repoUrl -> maven { url repoUrl } }
+
+        maven {
+            url 'https://repo.spring.io/libs-milestone'
+        }
+
+        maven {
+            url "${project.rootDir}/build/repo"
+        }
+
+    }
+
+}
+apply plugin: FixVersionProperties
+subprojects {
+
+  apply plugin: 'maven'
+  apply plugin: 'com.jfrog.bintray'
+
+  bintray {
+      user = System.getenv('BINTRAY_USER')
+      key = System.getenv('BINTRAY_KEY')
+      configurations = ['archives']
+      pkg {
+          repo = 'microservices-patterns-ftgo-multi-repo'
+          name = 'ftgo-multi-repo'
+          licenses = ['Apache-2.0']
+          vcsUrl = 'https://github.com/ftgo-multi-repo'
+      }
+  }
+
+
+  uploadArchives {
+      repositories {
+          mavenDeployer {
+              repository(url: deployUrl)
+              pom.project {
+                  licenses {
+                      license {
+                          name 'The Apache Software License, Version 2.0'
+                          url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                          distribution 'repo'
+                      }
+                  }
+              }
+          }
+      }
+  }
+
+}

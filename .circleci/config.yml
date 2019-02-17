@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - restore_cache:
+          key: multi-repo-{{ checksum "build.gradle" }}
+      - run: TERM=dumb ./gradlew testClasses
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: multi-repo-{{ checksum "build.gradle" }}
+      - run: TERM=dumb ./gradlew build
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit ~/container-logs ~/container-logs
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+            sudo bash -c 'find /var/lib/docker/containers -name "*-json.log" -exec cp {} ~/container-logs \;'
+            sudo bash -c 'find  ~/container-logs -type f -exec chown circleci {} \;'
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/container-logs
+      - run:
+           name: Publish artifacts
+           command: |
+             TERM=dumb ./publish-artifacts.sh
+           when: on_success
