@@ -55,6 +55,9 @@ subprojects {
       user = System.getenv('BINTRAY_USER')
       key = System.getenv('BINTRAY_KEY')
       configurations = ['archives']
+
+      publish = true
+      
       pkg {
           repo = 'microservices-patterns-ftgo-multi-repo'
           name = 'ftgo-multi-repo'
