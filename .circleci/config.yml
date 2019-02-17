@@ -29,5 +29,5 @@ jobs:
       - run:
            name: Publish artifacts
            command: |
-             TERM=dumb ./publish-artifacts.sh
+             TERM=dumb ./gradlew -P version=1.0.0.RELEASE -P deployUrl=https://dl.bintray.com/eventuateio-oss/microservices-patterns-ftgo-multi-repo testClasses bintrayUpload
            when: on_success
